@@ -11,10 +11,31 @@ module Tools
         required: true
     end
 
+    define_function :create_booking,
+      description: "Create a new booking for a user. Use only when the user provides user_id and booking details." do
+
+      property :user_id,
+        type: "string",
+        description: "User ID for the new booking",
+        required: true
+
+      property :details,
+        type: "string",
+        description: "Booking details such as hotel name, check-in date, check-out date, guest count, and contact information",
+        required: true
+    end
+
     def booking(user_id: nil, **)
       return "Please provide a user_id to look up an existing booking." if user_id.blank?
 
       BookingService.find_booking(user_id)
+    end
+
+    def create_booking(user_id: nil, details: nil, **)
+      return "Please provide a user_id to create a booking." if user_id.blank?
+      return "Please provide booking details to create a booking." if details.blank?
+
+      BookingService.create_booking(user_id: user_id, details: details)
     end
   end
 end

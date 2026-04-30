@@ -5,6 +5,17 @@ class AgentService
     /\Amistral/i
   ].freeze
 
+
+#   /\Allama3(?:\.\d+)?:/i
+# \A → matches start of the string
+# llama3 → matches the literal text "llama3"
+# (?:\.\d+)? → optional:
+# \. = a dot
+# \d+ = one or more digits
+# → matches things like .1, .2, etc.
+# : → requires a colon after the name
+# i → case-insensitive
+
   INSTRUCTIONS_WITH_TOOLS = <<~TEXT
 			You are a helpful AI assistant.
 
@@ -39,7 +50,7 @@ class AgentService
       Guidelines:
       - Ask clarifying questions if the user request is incomplete.
       - Be concise and clear in your responses.
-      - For booking requests, ask for missing details like check-in date, check-out date, guest count, and user ID before proceeding.
+      - For booking requests, ask for missing details like check-in date, check-out date, guest count, contact details, and user ID before proceeding.
       - For factual or external information that may be current, say that you cannot verify live data from this model.
 
       Always prioritize accuracy over speed.

@@ -6,4 +6,12 @@ class BookingService
 
     booking.to_json
   end
+
+  def self.create_booking(user_id:, details:)
+    booking = Booking.create!(user_id: user_id, details: details)
+
+    booking.to_json
+  rescue ActiveRecord::RecordInvalid => e
+    { error: e.record.errors.full_messages.to_sentence }.to_json
+  end
 end
