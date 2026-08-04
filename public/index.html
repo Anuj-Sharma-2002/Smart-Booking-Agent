@@ -1,0 +1,538 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>AI Agent Assistant</title>
+    <style>
+      :root {
+        color-scheme: light;
+        --bg: #f6f7f4;
+        --surface: #ffffff;
+        --surface-strong: #eef4f1;
+        --text: #17201c;
+        --muted: #66726d;
+        --line: #dfe6e1;
+        --accent: #146c5c;
+        --accent-strong: #0e5145;
+        --accent-soft: #dff0eb;
+        --warning: #f6b83f;
+        --shadow: 0 18px 60px rgba(23, 32, 28, 0.11);
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        font-family:
+          Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+          "Segoe UI", sans-serif;
+        color: var(--text);
+        background:
+          radial-gradient(circle at top left, rgba(20, 108, 92, 0.16), transparent 32rem),
+          linear-gradient(135deg, #f6f7f4 0%, #edf1ee 48%, #f8f4ec 100%);
+      }
+
+      button,
+      textarea {
+        font: inherit;
+      }
+
+      .shell {
+        width: min(1180px, calc(100% - 32px));
+        min-height: 100vh;
+        margin: 0 auto;
+        display: grid;
+        grid-template-columns: minmax(260px, 340px) minmax(0, 1fr);
+        gap: 24px;
+        padding: 32px 0;
+      }
+
+      .sidebar,
+      .chat {
+        background: rgba(255, 255, 255, 0.88);
+        border: 1px solid rgba(223, 230, 225, 0.9);
+        box-shadow: var(--shadow);
+        backdrop-filter: blur(18px);
+      }
+
+      .sidebar {
+        border-radius: 8px;
+        padding: 24px;
+        align-self: start;
+      }
+
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 28px;
+      }
+
+      .brand-mark {
+        width: 44px;
+        height: 44px;
+        border-radius: 8px;
+        display: grid;
+        place-items: center;
+        background: var(--accent);
+        color: #fff;
+        font-weight: 800;
+      }
+
+      h1,
+      h2,
+      p {
+        margin: 0;
+      }
+
+      h1 {
+        font-size: 1.25rem;
+        line-height: 1.2;
+      }
+
+      .subtitle {
+        margin-top: 3px;
+        color: var(--muted);
+        font-size: 0.9rem;
+      }
+
+      .tool-list {
+        display: grid;
+        gap: 12px;
+      }
+
+      .tool {
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        padding: 14px;
+        background: #fff;
+      }
+
+      .tool-title {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-weight: 750;
+      }
+
+      .tool-icon {
+        width: 30px;
+        height: 30px;
+        border-radius: 8px;
+        display: grid;
+        place-items: center;
+        background: var(--accent-soft);
+        color: var(--accent-strong);
+      }
+
+      .tool p {
+        margin-top: 8px;
+        color: var(--muted);
+        font-size: 0.9rem;
+        line-height: 1.45;
+      }
+
+      .stats {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
+        margin-top: 18px;
+      }
+
+      .stat {
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        padding: 12px;
+        background: var(--surface-strong);
+      }
+
+      .stat strong {
+        display: block;
+        font-size: 1.35rem;
+      }
+
+      .stat span {
+        color: var(--muted);
+        font-size: 0.82rem;
+      }
+
+      .chat {
+        min-height: calc(100vh - 64px);
+        border-radius: 8px;
+        display: grid;
+        grid-template-rows: auto 1fr auto;
+        overflow: hidden;
+      }
+
+      .chat-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 18px;
+        padding: 24px 26px;
+        border-bottom: 1px solid var(--line);
+      }
+
+      .chat-header h2 {
+        font-size: 1.35rem;
+      }
+
+      .status {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        color: var(--accent-strong);
+        font-size: 0.9rem;
+        font-weight: 650;
+        white-space: nowrap;
+      }
+
+      .status-dot {
+        width: 9px;
+        height: 9px;
+        border-radius: 999px;
+        background: #23a479;
+        box-shadow: 0 0 0 4px rgba(35, 164, 121, 0.16);
+      }
+
+      .messages {
+        padding: 24px 26px;
+        overflow-y: auto;
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+      }
+
+      .message {
+        max-width: min(78%, 720px);
+        border-radius: 8px;
+        padding: 14px 16px;
+        line-height: 1.55;
+        white-space: pre-wrap;
+      }
+
+      .message.agent {
+        align-self: flex-start;
+        background: var(--surface-strong);
+        border: 1px solid var(--line);
+      }
+
+      .message.thinking {
+        color: var(--muted);
+        font-style: italic;
+      }
+
+      .service-label {
+        display: block;
+        margin-bottom: 6px;
+        color: var(--accent-strong);
+        font-size: 0.78rem;
+        font-style: normal;
+        font-weight: 800;
+        text-transform: uppercase;
+      }
+
+      .message.user {
+        align-self: flex-end;
+        color: #fff;
+        background: var(--accent);
+      }
+
+      .suggestions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        padding: 0 26px 18px;
+      }
+
+      .suggestion {
+        min-height: 38px;
+        border: 1px solid var(--line);
+        border-radius: 999px;
+        padding: 8px 13px;
+        background: #fff;
+        color: var(--text);
+        cursor: pointer;
+      }
+
+      .suggestion:hover {
+        border-color: var(--accent);
+        color: var(--accent-strong);
+      }
+
+      .composer {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        gap: 12px;
+        padding: 18px 26px 24px;
+        border-top: 1px solid var(--line);
+        background: rgba(255, 255, 255, 0.72);
+      }
+
+      textarea {
+        width: 100%;
+        min-height: 54px;
+        max-height: 150px;
+        resize: vertical;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        padding: 14px;
+        color: var(--text);
+        background: #fff;
+        outline: none;
+      }
+
+      textarea:focus {
+        border-color: var(--accent);
+        box-shadow: 0 0 0 4px rgba(20, 108, 92, 0.12);
+      }
+
+      .send {
+        min-width: 118px;
+        min-height: 54px;
+        border: 0;
+        border-radius: 8px;
+        padding: 0 18px;
+        color: #fff;
+        background: var(--accent);
+        font-weight: 750;
+        cursor: pointer;
+      }
+
+      .send:hover {
+        background: var(--accent-strong);
+      }
+
+      .send:disabled {
+        cursor: wait;
+        opacity: 0.7;
+      }
+
+      @media (max-width: 860px) {
+        .shell {
+          grid-template-columns: 1fr;
+          padding: 16px 0;
+        }
+
+        .chat {
+          min-height: 70vh;
+        }
+
+        .message {
+          max-width: 92%;
+        }
+      }
+
+      @media (max-width: 560px) {
+        .shell {
+          width: min(100% - 20px, 1180px);
+        }
+
+        .sidebar,
+        .chat-header,
+        .messages,
+        .composer {
+          padding-left: 16px;
+          padding-right: 16px;
+        }
+
+        .chat-header,
+        .composer {
+          grid-template-columns: 1fr;
+          align-items: stretch;
+        }
+
+        .composer {
+          display: grid;
+        }
+
+        .send {
+          width: 100%;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="shell">
+      <aside class="sidebar" aria-label="Agent tools">
+        <div class="brand">
+          <div class="brand-mark" aria-hidden="true">AI</div>
+          <div>
+            <h1>AI Agent Assistant</h1>
+            <p class="subtitle">Search, booking, and FAQ support</p>
+          </div>
+        </div>
+
+        <section class="tool-list" aria-label="Available tools">
+          <article class="tool">
+            <div class="tool-title">
+              <span class="tool-icon" aria-hidden="true">S</span>
+              Search Tool
+            </div>
+            <p>Ask for current travel details, places, services, or web-backed information.</p>
+          </article>
+          <article class="tool">
+            <div class="tool-title">
+              <span class="tool-icon" aria-hidden="true">B</span>
+              Booking Tool
+            </div>
+            <p>Create reservations that are saved by the Rails backend.</p>
+          </article>
+          <article class="tool">
+            <div class="tool-title">
+              <span class="tool-icon" aria-hidden="true">F</span>
+              FAQ Tool
+            </div>
+            <p>Retrieve answers from indexed documents and stored knowledge.</p>
+          </article>
+        </section>
+
+        <div class="stats" aria-label="Application summary">
+          <div class="stat">
+            <strong>3</strong>
+            <span>agent tools</span>
+          </div>
+          <div class="stat">
+            <strong>1</strong>
+            <span>chat API</span>
+          </div>
+        </div>
+      </aside>
+
+      <section class="chat" aria-label="Chat with AI agent">
+        <header class="chat-header">
+          <div>
+            <h2>Agent workspace</h2>
+            <p class="subtitle">Send a query and the agent will route it to the right service.</p>
+          </div>
+          <div class="status" aria-live="polite">
+            <span class="status-dot" aria-hidden="true"></span>
+            Ready
+          </div>
+        </header>
+
+        <div class="messages" id="messages" aria-live="polite">
+          <div class="message agent">Hi, I can help search for information, answer FAQs, or create a booking. What would you like to do?</div>
+        </div>
+
+        <div class="suggestions" aria-label="Example prompts">
+          <button class="suggestion" type="button">Find hotels in Goa for this weekend</button>
+          <button class="suggestion" type="button">Book a room for user 42</button>
+          <button class="suggestion" type="button">What services do you support?</button>
+        </div>
+
+        <form class="composer" id="chat-form">
+          <textarea id="query" name="query" rows="2" placeholder="Ask the agent anything..." required></textarea>
+          <button class="send" id="send" type="submit">Send</button>
+        </form>
+      </section>
+    </main>
+
+    <script>
+      const form = document.querySelector("#chat-form");
+      const input = document.querySelector("#query");
+      const send = document.querySelector("#send");
+      const messages = document.querySelector("#messages");
+
+      function addMessage(text, role) {
+        const message = document.createElement("div");
+        message.className = `message ${role}`;
+        message.textContent = text;
+        messages.appendChild(message);
+        messages.scrollTop = messages.scrollHeight;
+        return message;
+      }
+
+      function serviceFor(query) {
+        const normalizedQuery = query.toLowerCase();
+
+        if (/\b(user[_ -]?id|booking|book|reservation|reserve)\b/.test(normalizedQuery)) {
+          return "Booking service";
+        }
+
+        if (/\b(faq|policy|policies|support|knowledge base|services do you support)\b/.test(normalizedQuery)) {
+          return "FAQ service";
+        }
+
+        return "Search service";
+      }
+
+      function setThinkingMessage(message, service) {
+        message.innerHTML = "";
+
+        const serviceLabel = document.createElement("span");
+        serviceLabel.className = "service-label";
+        serviceLabel.textContent = service;
+
+        const text = document.createTextNode("App is thinking...");
+
+        message.appendChild(serviceLabel);
+        message.appendChild(text);
+      }
+
+      async function askAgent(query) {
+        addMessage(query, "user");
+        const selectedService = serviceFor(query);
+        const thinkingMessage = addMessage("", "agent thinking");
+        setThinkingMessage(thinkingMessage, selectedService);
+        send.disabled = true;
+        send.textContent = "Sending";
+
+        try {
+          const response = await fetch("/chat", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "Accept": "application/json"
+            },
+            body: JSON.stringify({ query })
+          });
+          const data = await response.json();
+
+          if (!response.ok) {
+            throw new Error(data.error || "The agent could not complete the request.");
+          }
+
+          thinkingMessage.className = "message agent";
+          if (data.service && data.service !== selectedService) {
+            setThinkingMessage(thinkingMessage, data.service);
+          }
+          thinkingMessage.textContent = data.response || "Done.";
+        } catch (error) {
+          thinkingMessage.className = "message agent";
+          thinkingMessage.textContent = error.message;
+        } finally {
+          send.disabled = false;
+          send.textContent = "Send";
+          input.focus();
+        }
+      }
+
+      form.addEventListener("submit", (event) => {
+        event.preventDefault();
+        const query = input.value.trim();
+        if (!query) return;
+        input.value = "";
+        askAgent(query);
+      });
+
+      input.addEventListener("keydown", (event) => {
+        if (event.key === "Enter" && !event.shiftKey) {
+          event.preventDefault();
+          form.requestSubmit();
+        }
+      });
+
+      document.querySelectorAll(".suggestion").forEach((button) => {
+        button.addEventListener("click", () => {
+          input.value = button.textContent;
+          input.focus();
+        });
+      });
+    </script>
+  </body>
+</html>
