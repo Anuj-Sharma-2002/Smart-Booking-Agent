@@ -1,6 +1,6 @@
 class LlmService
   DEFAULT_OLLAMA_URL = "http://localhost:11434"
-  DEFAULT_CHAT_MODEL = "gemma:2b"
+  DEFAULT_CHAT_MODEL = "llama3.1:8b"
   DEFAULT_EMBEDDING_MODEL = "nomic-embed-text"
   DEFAULT_OLLAMA_TIMEOUT = 180
 
@@ -16,16 +16,22 @@ class LlmService
     ))
   end
 
+  def self.ask(prompt)
+    response = client.chat(messages: [{ role: "user", content: prompt }])
+
+    response.chat_completion.presence || response.completion
+  end
+
   def self.chat_model
-    ENV.fetch("OLLAMA_CHAT_MODEL", DEFAULT_CHAT_MODEL)
+    DEFAULT_CHAT_MODEL
   end
 
   def self.embedding_model
-    ENV.fetch("OLLAMA_EMBEDDING_MODEL", DEFAULT_EMBEDDING_MODEL)
+    DEFAULT_EMBEDDING_MODEL
   end
 
   def self.ollama_url
-    ENV.fetch("OLLAMA_URL", DEFAULT_OLLAMA_URL)
+    DEFAULT_OLLAMA_URL
   end
 
   def self.temperature
@@ -33,7 +39,7 @@ class LlmService
   end
 
   def self.ollama_timeout
-    ENV.fetch("OLLAMA_TIMEOUT", DEFAULT_OLLAMA_TIMEOUT).to_i
+    DEFAULT_OLLAMA_TIMEOUT.to_i
   end
 
   def self.reset_client!

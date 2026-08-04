@@ -12,6 +12,8 @@ module Tools
     end
 
     def search(query:)
+      Rails.logger.info("[Tool Used] SearchTool.search query=#{query.inspect}")
+
       SearchService.search(query)
     end
   end

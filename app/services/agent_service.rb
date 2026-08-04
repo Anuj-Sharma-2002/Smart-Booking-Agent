@@ -22,6 +22,7 @@ class AgentService
 			You have access to the following tools:
 			- SearchTool: Use this to find information, answer general questions, or retrieve data.
 			- BookingTool: Use this only to look up existing booking details by user_id.
+			- FaqTool: Use this to answer questions from the local FAQ or knowledge base.
 
 			Guidelines:
 			- Always use tools when they are relevant instead of guessing.
@@ -37,6 +38,7 @@ class AgentService
 
 			Search rules:
 			- Use SearchTool for factual or external information.
+			- Use FaqTool for questions about policies, FAQs, support answers, or knowledge base content.
 
 			Always prioritize accuracy over speed.
 		TEXT
@@ -83,7 +85,7 @@ class AgentService
   end
 
   def self.tools
-    tools_supported? ? [Tools::SearchTool.new, Tools::BookingTool.new] : []
+    tools_supported? ? [Tools::SearchTool.new, Tools::BookingTool.new, Tools::FaqTool.new] : []
   end
 
   def self.instructions

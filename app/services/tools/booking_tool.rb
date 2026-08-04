@@ -26,12 +26,16 @@ module Tools
     end
 
     def booking(user_id: nil, **)
+      Rails.logger.info("[Tool Used] BookingTool.booking user_id=#{user_id.inspect}")
+
       return "Please provide a user_id to look up an existing booking." if user_id.blank?
 
       BookingService.find_booking(user_id)
     end
 
     def create_booking(user_id: nil, details: nil, **)
+      Rails.logger.info("[Tool Used] BookingTool.create_booking user_id=#{user_id.inspect} details=#{details.inspect}")
+
       return "Please provide a user_id to create a booking." if user_id.blank?
       return "Please provide booking details to create a booking." if details.blank?
 
