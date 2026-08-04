@@ -47,11 +47,12 @@ group :development, :test do
 end
 
 
-gem 'langchainrb'
-gem 'httparty'
-gem 'neighbor'
-gem 'pgvector'
-gem 'ollama'
+gem "langchainrb"
+gem "httparty"
+gem "neighbor"
+gem "pgvector"
+gem "ollama"
 # Gemfile
 gem "faraday"
-gem 'dotenv-rails'
+gem "dotenv-rails"
+gem "ruby-lsp", "~> 0.26.10", group: :development

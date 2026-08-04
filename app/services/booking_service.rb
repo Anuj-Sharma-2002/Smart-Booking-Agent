@@ -1,10 +1,10 @@
 class BookingService
   def self.find_booking(user_id)
-    booking = Booking.find_by(user_id: user_id)
+    bookings = Booking.where(user_id: user_id)
 
-    return { error: "No existing booking found for user_id #{user_id}." }.to_json if booking.blank?
+    return { error: "No existing bookings found for user_id #{user_id}." }.to_json if bookings.blank?
 
-    booking.to_json
+    bookings.to_json
   end
 
   def self.create_booking(user_id:, details:)

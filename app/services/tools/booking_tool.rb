@@ -4,7 +4,6 @@ module Tools
 
     define_function :booking,
       description: "Look up existing booking details by user_id. Do not use this to create a new hotel booking." do
-
       property :user_id,
         type: "string",
         description: "User ID for an existing booking lookup",
@@ -13,7 +12,6 @@ module Tools
 
     define_function :create_booking,
       description: "Create a new booking for a user. Use only when the user provides user_id and booking details." do
-
       property :user_id,
         type: "string",
         description: "User ID for the new booking",

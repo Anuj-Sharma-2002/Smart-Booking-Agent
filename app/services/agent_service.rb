@@ -70,6 +70,15 @@ class AgentService
     response_text(agent.add_message_and_run!(content: query))
   end
 
+  def self.service_for(query)
+    normalized_query = query.to_s.downcase
+
+    return "Booking service" if normalized_query.match?(/\b(user[_ -]?id|booking|book|reservation|reserve)\b/)
+    return "FAQ service" if normalized_query.match?(/\b(faq|policy|policies|support|knowledge base|services do you support)\b/)
+
+    "Search service"
+  end
+
   def self.response_text(response)
     return response if response.is_a?(String)
 
