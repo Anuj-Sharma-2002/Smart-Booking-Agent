@@ -1,0 +1,42 @@
+[Unit]
+Description=Cloudflare Quick Tunnel for Ollama (trycloudflare.com)
+Documentation=https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/
+After=network-online.target ollama.service
+Wants=network-online.target
+# Restart when Ollama restarts so we re-register the tunnel
+BindsTo=ollama.service
+
+[Service]
+Type=simple
+# Replace YOUR_USERNAME with your actual Linux username
+User=YOUR_USERNAME
+Group=YOUR_USERNAME
+
+# Where to write the tunnel log (used by the URL-extractor below)
+Environment="TUNNEL_LOG=/tmp/cloudflared_tunnel.log"
+Environment="OLLAMA_PORT=11434"
+
+# Start cloudflared and tee its stderr (where the URL appears) to the log
+ExecStart=/bin/bash -c '/usr/local/bin/cloudflared tunnel --url http://localhost:${OLLAMA_PORT} --http-host-header localhost --no-autoupdate 2>&1 | tee ${TUNNEL_LOG}'
+
+# After cloudflared starts, wait for the URL and update Render (optional)
+ExecStartPost=/bin/bash -c '\
+  for i in $(seq 1 30); do \
+    URL=$(grep -oP "https://[a-z0-9\\-]+\\.trycloudflare\\.com" ${TUNNEL_LOG} 2>/dev/null | head -1); \
+    [ -n "$URL" ] && break; \
+    sleep 1; \
+  done; \
+  echo "Tunnel URL: $URL"; \
+  systemd-notify --status="Tunnel live at $URL"'
+
+Restart=always
+RestartSec=10
+# Give cloudflared 30s to connect before systemd marks it as failed
+TimeoutStartSec=60
+
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=cloudflared-ollama
+
+[Install]
+WantedBy=multi-user.target
