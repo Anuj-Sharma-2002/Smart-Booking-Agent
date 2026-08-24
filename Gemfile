@@ -55,4 +55,4 @@ gem "ollama"
 # Gemfile
 gem "faraday"
 gem "dotenv-rails"
-gem "ruby-lsp", "~> 0.26.10", group: :development
+gem "ruby-lsp", "~> 0.26.11", group: :development
